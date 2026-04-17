@@ -16,13 +16,27 @@ import com.example.firebase.ui.theme.FirebaseTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                100
+            )
+        }
+
         enableEdgeToEdge()
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) return@addOnCompleteListener
+
+                val token = task.result
+                android.util.Log.d("FCM_TOKEN", token)
+            }
+
         setContent {
             FirebaseTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                    PantallaPrincipal(
+                        padding = Modifier.padding(innerPadding)
                     )
                 }
             }
@@ -30,18 +44,18 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    FirebaseTheme {
-        Greeting("Android")
+fun PantallaPrincipal(padding: Modifier = Modifier) {
+    androidx.compose.foundation.layout.Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .then(padding),
+        contentAlignment = androidx.compose.ui.Alignment.Center
+    ) {
+        Text(
+            text = "📩 Esperando notificaciones...",
+            style = androidx.compose.material3.MaterialTheme.typography.headlineMedium
+        )
     }
 }
